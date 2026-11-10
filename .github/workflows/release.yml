@@ -1,0 +1,52 @@
+name: publish releases
+
+on:
+  push:
+    paths:
+      - '.github/workflows/release.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: mingw-w64-ucrt-x86_64-gcc
+
+      - name: Build installer
+        shell: pwsh
+        run: |
+          $env:PATH = "C:\msys64\ucrt64\bin;$env:PATH"
+          python -m pip install --quiet pefile
+          python installer/build_installer.py
+
+      - name: Repo topics
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh repo edit --add-topic road-rash
+          gh repo edit --add-topic localization
+          gh repo edit --add-topic chinese
+          gh repo edit --add-topic game-mod
+          gh repo edit --add-topic windows
+          gh repo edit --add-topic fan-translation
+          gh repo edit --add-topic reverse-engineering
+          gh repo edit --add-topic road-rash-95
+
+      - name: Releases
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $exe = "dist\RoadRash-30th-Localization.exe"
+          gh release create v1.1.0 $exe --title "v1.1.0 - 多语言扩展（58 种语言）" --notes-file docs/RELEASE-v1.1.0.md --latest
+          gh release create v1.0.0 $exe --title "v1.0.0 - 简体中文" --notes-file docs/RELEASE-v1.0.0.md
+          gh release create v0.1.0 $exe --title "v0.1.0 - 逆向验证与工具链" --notes-file docs/RELEASE-v0.1.0.md

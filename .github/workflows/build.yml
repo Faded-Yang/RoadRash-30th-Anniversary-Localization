@@ -2,28 +2,34 @@ name: build installer
 
 on:
   push:
-    paths: ['installer/**', '.github/workflows/build.yml', 'translations/**']
+    paths:
+      - 'installer/**'
+      - 'translations/**'
+      - '.github/workflows/build.yml'
+  pull_request:
   workflow_dispatch:
-  release:
-    types: [created]
 
 jobs:
   windows:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Install MinGW
+
+      - uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          install: mingw-w64-ucrt-x86_64-gcc
+
+      - name: Build installer
+        shell: pwsh
         run: |
-          choco install mingw -y --no-progress
-          echo "C:\ProgramData\chocolatey\bin" >> $env:GITHUB_PATH
-      - name: Build package
-        run: python installer/build_installer.py
+          $env:PATH = "C:\msys64\ucrt64\bin;$env:PATH"
+          python -m pip install --quiet pefile
+          python installer/build_installer.py
+          Get-Item dist\*.exe | Format-List Name,Length
+
       - uses: actions/upload-artifact@v4
         with:
           name: installer
           path: dist/*.exe
-      - name: Attach to release
-        if: github.event_name == 'release'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: dist/*.exe
+          if-no-files-found: error
