@@ -119,6 +119,13 @@ static int applyPatches(const wchar_t* exePath, unsigned char charset, const cha
             p[0] = 0xE8; wr32(p+1, (unsigned)rel); p[5] = 0x90;
         } else if (p[0] != 0xE8) ok = 0;
     }
+    /* CP1252 弯引号格式串 "%s : \x93%s\x94" 在 CP936 下会被当成双字节首字节，改成 ASCII 引号 */
+    {
+        static const unsigned char pat[10] = {'%','s',' ',':',' ',0x93,'%','s',0x94,0};
+        for (unsigned i = 0; i + 10 <= n; i++){
+            if (memcmp(d + i, pat, 10) == 0){ d[i+5] = 0x22; d[i+8] = 0x22; break; }
+        }
+    }
     if (ok) ok = patchW(exePath, d, n);
     free(d);
     return ok;
