@@ -1,11 +1,10 @@
-name: publish releases
+name: publish release
 
 on:
   push:
     paths:
       - '.github/workflows/release.yml'
       - 'installer/**'
-      - 'translations/**'
   workflow_dispatch:
 
 permissions:
@@ -28,26 +27,17 @@ jobs:
           $env:PATH = "C:\msys64\ucrt64\bin;$env:PATH"
           python -m pip install --quiet pefile
           python installer/build_installer.py
-          if (-not (Test-Path "dist\RoadRash-30th-Localization.exe")) { throw "build produced no exe" }
+          if (-not (Test-Path "dist/RoadRash-Localization-zh-CN.exe")) { throw "build produced no exe" }
 
-      - name: Create releases
+      - name: Release
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          $exe = "dist\RoadRash-30th-Localization.exe"
-          gh release view v0.1.0 2>$null; if ($LASTEXITCODE -ne 0) { gh release create v0.1.0 $exe --title "v0.1.0 - 逆向验证与工具链" --notes-file docs/RELEASE-v0.1.0.md }
-          gh release view v1.0.0 2>$null; if ($LASTEXITCODE -ne 0) { gh release create v1.0.0 $exe --title "v1.0.0 - 简体中文" --notes-file docs/RELEASE-v1.0.0.md }
-          gh release view v1.1.0 2>$null; if ($LASTEXITCODE -ne 0) { gh release create v1.1.0 $exe --title "v1.1.0 - 多语言扩展（58 种语言）" --notes-file docs/RELEASE-v1.1.0.md }
-          gh release view v1.2.0 2>$null; if ($LASTEXITCODE -ne 0) { gh release create v1.2.0 $exe --title "v1.2.0 - 跨代码页渲染修复" --notes-file docs/RELEASE-v1.2.0.md --latest }
-          gh release upload v1.2.0 $exe --clobber
-
-      - name: Repo topics (best effort)
-        continue-on-error: true
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          foreach ($t in @('road-rash','localization','chinese','game-mod','windows','fan-translation','reverse-engineering','road-rash-95')) {
-            gh repo edit --add-topic $t
+          $exe = "dist/RoadRash-Localization-zh-CN.exe"
+          gh release view v1.3.0 2>$null
+          if ($LASTEXITCODE -ne 0) {
+            gh release create v1.3.0 $exe --title "v1.3.0 - 简体中文" --notes-file docs/RELEASE-v1.3.0.md --latest
+          } else {
+            gh release upload v1.3.0 $exe --clobber
           }

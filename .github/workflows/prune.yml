@@ -1,0 +1,28 @@
+name: prune unsupported languages
+
+on:
+  push:
+    paths:
+      - '.github/workflows/prune.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  prune:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Delete non zh-CN language packs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: Faded-Yang/RoadRash-30th-Anniversary-Localization
+        run: |
+          for f in translations/lang/*.json; do
+            base=$(basename "$f")
+            [ "$base" = "zh-CN.json" ] && continue
+            sha=$(gh api "repos/$GH_REPO/contents/$f" --jq .sha 2>/dev/null) || continue
+            gh api -X DELETE "repos/$GH_REPO/contents/$f" \
+              -f message="prune: 移除未支持的语言包" -f sha="$sha" || true
+          done
