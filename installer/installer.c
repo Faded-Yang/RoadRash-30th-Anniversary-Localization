@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <tlhelp32.h>
 
 #define PACK_MAGIC    0x314B505A
 #define TRAILER_MAGIC 0x314C5252
@@ -31,7 +32,7 @@ static const unsigned CALL_OFF[6] = {0x3f2f5,0x3f3b6,0x3f40a,0x3f74e,0x3f7b9,0x3
 static const unsigned char LSA_CALL[6] = {0xFF,0x15,0x88,0xC7,0x61,0x00};
 
 enum { M_TITLE=0, M_GAMEDIR, M_NOTFOUND, M_BKDLL, M_BKEXE, M_BKEXIST, M_WRDLL, M_PATCH,
-       M_DONE, M_UNINST, M_R_DLL, M_R_EXE, M_NOBK, M_UNINSTD, M_ENTER, M_ADMIN, M_ERR, M_FAIL, M_COUNT };
+       M_DONE, M_UNINST, M_R_DLL, M_R_EXE, M_NOBK, M_UNINSTD, M_ENTER, M_ADMIN, M_ERR, M_FAIL, M_RUNNING, M_COUNT };
 
 static const char* M[M_COUNT];
 
@@ -44,6 +45,17 @@ static int isElevated(void){
         CheckTokenMembership(NULL, sid, &a); FreeSid(sid);
     }
     return a;
+}
+static int isGameRunning(void){
+    HANDLE snap = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    if (snap == INVALID_HANDLE_VALUE) return 0;
+    PROCESSENTRY32W pe; pe.dwSize = sizeof(pe);
+    int found = 0;
+    if (Process32FirstW(snap, &pe)) do {
+        if (!_wcsicmp(pe.szExeFile, L"RoadRash95.exe")) { found = 1; break; }
+    } while (Process32NextW(snap, &pe));
+    CloseHandle(snap);
+    return found;
 }
 static int existsW(const wchar_t* p){ return GetFileAttributesW(p) != INVALID_FILE_ATTRIBUTES; }
 static int readW(const wchar_t* p, unsigned char** o, unsigned int* n){
@@ -170,6 +182,8 @@ int main(int argc, char** argv){
     }
     { char b[MAX_PATH*4]; u8(game, b, sizeof b); printf("%s %s\n\n", M[M_GAMEDIR], b); }
 
+    if (isGameRunning()){ printf("\n%s\n", M[M_RUNNING]); bye(1); }
+
     if (uninstall){
         int ok = 0;
         if (existsW(enuBak)){ unsigned char* d=NULL; unsigned int n=0;
@@ -193,11 +207,15 @@ int main(int argc, char** argv){
         free(d); printf("[OK] %s\n", M[M_BKEXE]);
     } else printf("[--] %s\n", M[M_BKEXIST]);
 
-    if (!writeW(enuPath, pack + dllOff, dllSize)) die("write TEXT\\ENU.DLL failed (file in use?)");
-    printf("[OK] %s (%u bytes)\n", M[M_WRDLL], dllSize);
-
     if (!applyPatches(exePath, charset, face, cp, pack + thunkOff, thunkLen)) die(M[M_FAIL]);
     printf("[OK] %s\n", M[M_PATCH]);
+
+    if (!writeW(enuPath, pack + dllOff, dllSize)){
+        unsigned char* b = NULL; unsigned int bn = 0;
+        if (readW(exeBak, &b, &bn)){ patchW(exePath, b, bn); free(b); }
+        die("write TEXT\\ENU.DLL failed");
+    }
+    printf("[OK] %s (%u bytes)\n", M[M_WRDLL], dllSize);
 
     printf("\n%s\n", M[M_DONE]);
     bye(0);
