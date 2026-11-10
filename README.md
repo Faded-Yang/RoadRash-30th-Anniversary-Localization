@@ -49,10 +49,27 @@
 
 ## 安装
 
-1. 下载 `installer.exe`（见 Releases 或 Actions 构建产物）；
-2. 把它**放进游戏目录**（和 `RoadRash95.exe` 同级，通常是
-   `...\Steam\steamapps\common\RoadRash`）；
-3. 双击运行 → 按提示选语言 → 完成。
+### 方式 A：已经打包好的安装器（推荐）
+
+仓库 `dist\` 下有两个文件：
+
+- `一键安装.cmd` —— 双击即可（会从下面的 base64 解包出安装器并运行）
+- `installer.exe.gz.b64` —— 安装器本体（gzip + base64，因为 GitHub API 不能直接传二进制）
+
+把这两个文件下载到**游戏目录**（和 `RoadRash95.exe` 同级，通常是
+`...\Steam\steamapps\common\RoadRash`），双击 `一键安装.cmd`。
+
+### 方式 B：自己构建
+
+```bash
+pip install pefile
+python installer/build_installer.py
+# 产物：dist/RoadRash-30th-Localization.exe
+```
+
+然后把它放进游戏目录双击运行 → 按提示选语言 → 完成。
+
+> 也可以在 Actions 里下载 CI 自动构建的 `installer` artifact。
 
 安装器会自动：备份 → 写入对应语言 DLL → 打字体补丁。
 卸载：再运行一次，命令行加 `uninstall`，或选择卸载。
