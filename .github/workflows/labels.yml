@@ -1,0 +1,39 @@
+name: setup labels & topics
+
+on:
+  push:
+    paths:
+      - '.github/workflows/labels.yml'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  labels:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create issue labels
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: Faded-Yang/RoadRash-30th-Anniversary-Localization
+        run: |
+          gh label create "简体中文"        --color d73a4a --description "简体中文相关" --force
+          gh label create "translation-error" --color e99695 --description "译文错误/不自然/术语不一致" --force
+          gh label create "language-request"  --color 0e8a16 --description "希望新增某语言" --force
+          gh label create "installer"         --color 1d76db --description "安装器 / 备份 / 卸载问题" --force
+          gh label create "rendering"         --color fbca04 --description "乱码 / 问号 / 字体 / 代码页" --force
+          gh label create "reverse-engineering" --color 5319e7 --description "逆向 / 二进制 / 工具链" --force
+          gh label create "documentation"     --color 0075ca --description "文档改进" --force
+
+      - name: Add repository topics
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: Faded-Yang/RoadRash-30th-Anniversary-Localization
+        run: |
+          for t in road-rash localization chinese game-mod windows fan-translation reverse-engineering road-rash-95; do
+            gh repo edit --add-topic "$t" || true
+          done
