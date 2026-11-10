@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - '.github/workflows/release.yml'
+      - 'installer/**'
+      - 'translations/**'
   workflow_dispatch:
 
 permissions:
@@ -34,9 +36,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           $exe = "dist\RoadRash-30th-Localization.exe"
-          gh release create v1.1.0 $exe --title "v1.1.0 - 多语言扩展（58 种语言）" --notes-file docs/RELEASE-v1.1.0.md --latest
-          gh release create v1.0.0 $exe --title "v1.0.0 - 简体中文" --notes-file docs/RELEASE-v1.0.0.md
-          gh release create v0.1.0 $exe --title "v0.1.0 - 逆向验证与工具链" --notes-file docs/RELEASE-v0.1.0.md
+          gh release view v0.1.0 2>$null; if ($LASTEXITCODE -ne 0) { gh release create v0.1.0 $exe --title "v0.1.0 - 逆向验证与工具链" --notes-file docs/RELEASE-v0.1.0.md }
+          gh release view v1.0.0 2>$null; if ($LASTEXITCODE -ne 0) { gh release create v1.0.0 $exe --title "v1.0.0 - 简体中文" --notes-file docs/RELEASE-v1.0.0.md }
+          gh release view v1.1.0 2>$null; if ($LASTEXITCODE -ne 0) { gh release create v1.1.0 $exe --title "v1.1.0 - 多语言扩展（58 种语言）" --notes-file docs/RELEASE-v1.1.0.md }
+          gh release view v1.2.0 2>$null; if ($LASTEXITCODE -ne 0) { gh release create v1.2.0 $exe --title "v1.2.0 - 跨代码页渲染修复" --notes-file docs/RELEASE-v1.2.0.md --latest }
+          gh release upload v1.2.0 $exe --clobber
 
       - name: Repo topics (best effort)
         continue-on-error: true
