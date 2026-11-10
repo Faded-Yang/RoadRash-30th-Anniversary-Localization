@@ -1,0 +1,29 @@
+name: build installer
+
+on:
+  push:
+    paths: ['installer/**', '.github/workflows/build.yml', 'translations/**']
+  workflow_dispatch:
+  release:
+    types: [created]
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install MinGW
+        run: |
+          choco install mingw -y --no-progress
+          echo "C:\ProgramData\chocolatey\bin" >> $env:GITHUB_PATH
+      - name: Build package
+        run: python installer/build_installer.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: installer
+          path: dist/*.exe
+      - name: Attach to release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*.exe
