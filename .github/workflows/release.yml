@@ -26,22 +26,9 @@ jobs:
           $env:PATH = "C:\msys64\ucrt64\bin;$env:PATH"
           python -m pip install --quiet pefile
           python installer/build_installer.py
+          if (-not (Test-Path "dist\RoadRash-30th-Localization.exe")) { throw "build produced no exe" }
 
-      - name: Repo topics
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh repo edit --add-topic road-rash
-          gh repo edit --add-topic localization
-          gh repo edit --add-topic chinese
-          gh repo edit --add-topic game-mod
-          gh repo edit --add-topic windows
-          gh repo edit --add-topic fan-translation
-          gh repo edit --add-topic reverse-engineering
-          gh repo edit --add-topic road-rash-95
-
-      - name: Releases
+      - name: Create releases
         shell: pwsh
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -50,3 +37,13 @@ jobs:
           gh release create v1.1.0 $exe --title "v1.1.0 - 多语言扩展（58 种语言）" --notes-file docs/RELEASE-v1.1.0.md --latest
           gh release create v1.0.0 $exe --title "v1.0.0 - 简体中文" --notes-file docs/RELEASE-v1.0.0.md
           gh release create v0.1.0 $exe --title "v0.1.0 - 逆向验证与工具链" --notes-file docs/RELEASE-v0.1.0.md
+
+      - name: Repo topics (best effort)
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          foreach ($t in @('road-rash','localization','chinese','game-mod','windows','fan-translation','reverse-engineering','road-rash-95')) {
+            gh repo edit --add-topic $t
+          }
