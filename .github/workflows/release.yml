@@ -1,4 +1,5 @@
 name: publish release
+# rebuild: 2026-11-10 触发重建（译文定稿）
 
 on:
   push:

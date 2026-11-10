@@ -7,6 +7,17 @@
 [![Release](https://img.shields.io/github/v/release/Faded-Yang/RoadRash-30th-Anniversary-Localization?label=release&color=red)](../../releases)
 ![Platform](https://img.shields.io/badge/platform-Windows%2095%E2%80%9311-lightgrey)
 
+
+## 效果展示
+
+![车库](docs/screenshots/garage.jpg)
+
+![车辆详情](docs/screenshots/bike.jpg)
+
+![赛道](docs/screenshots/track.jpg)
+
+![厕所菜单](docs/screenshots/menu.jpg)
+
 ---
 
 ## 安装
