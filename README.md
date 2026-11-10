@@ -1,9 +1,7 @@
-# Road Rash 30th Anniversary — Localization Patch
+# Road Rash 30th Anniversary — 简体中文汉化补丁
 
-Unofficial localization for **Road Rash: 30th Anniversary Edition** (Steam, `RoadRash95.exe`).
-Non-invasive: the game's own language-DLL mechanism is reused — no injection framework, no overlays.
-
-**中文说明见下方。**
+**暴力摩托：30 周年纪念版**（Steam，`RoadRash95.exe`）的非官方简体中文汉化。
+使用游戏自带的语言 DLL 机制，不改引擎、不加外挂层，全部可逆。
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Release](https://img.shields.io/github/v/release/Faded-Yang/RoadRash-30th-Anniversary-Localization?label=release&color=red)](../../releases)
@@ -11,68 +9,41 @@ Non-invasive: the game's own language-DLL mechanism is reused — no injection f
 
 ---
 
-## Supported languages
+## 安装
 
-| Language | Status | Notes |
-|---|---|---|
-| 简体中文 (zh-CN) | ✅ **Verified** | Human translation, cross-checked against the game's four official localizations |
-| 繁體中文 (zh-TW) | ✅ Verified | Converted from zh-CN |
-| 日本語 (ja) | ✅ Verified | Machine translation |
-| 한국어 (ko) | ✅ Verified | Machine translation |
-| English / Deutsch / Français / Italiano / Español | — | **Already built into the game**, no patch needed |
-| Other languages | ⚠️ Experimental | Machine translation; rendering is not verified on all Windows locale settings — not shipped by default |
+1. 从 [Releases](../../releases/latest) 下载 `Install-zh-CN.exe`；
+2. **把它放进游戏目录** —— 与 `RoadRash95.exe` 同级，通常是
+   `...\Steam\steamapps\common\RoadRash\`；
+3. **确认游戏已完全关闭**，双击运行，按提示操作（会请求管理员权限）。
 
-Only the verified languages are offered by the installer. Other language sources stay in
-`translations/lang/` for future work.
+卸载：再运行一次，命令行加 `uninstall`，即可完整还原。
 
-## Install
+> 安装器只认自己所在的目录；放错了会明确提示。
 
-1. Download the installer for your language from [Releases](../../releases/latest).
-2. **Put it inside the game folder** — the same folder as `RoadRash95.exe`, usually
-   `...\Steam\steamapps\common\RoadRash\`.
-3. Double-click and follow the prompt (it will ask for administrator rights).
-
-Uninstall: run it again and choose uninstall.
-
-## What it changes
+## 它改了什么
 
 ```
 RoadRash\
-  TEXT\ENU.DLL          ← replaced with the localized text resource (original kept as ENU.DLL.rrzhbak)
-  RoadRash95.exe        ← font charset / font name patch (original kept as RoadRash95.exe.rrzhbak)
+  TEXT\ENU.DLL          ← 换成简体中文文本（原文件备份为 ENU.DLL.rrzhbak）
+  RoadRash95.exe        ← 字体字符集/字体名 + 文本转码兼容层（备份 RoadRash95.exe.rrzhbak）
 ```
 
-The game reads its text from `TEXT\<LANG>.DLL` (Win32 `RT_STRING` resources) and fetches it with
-`LoadStringA`. Putting the localized DLL into the English slot means the default language becomes
-the patched one, with no registry dependency — any language-detection failure falls back to it.
+游戏从 `TEXT\<语言>.DLL` 的 Win32 `RT_STRING` 资源读取文本，用 `LoadStringA` 取出。
+把中文放进「英语槽位」后，默认语言即为中文，且不依赖注册表——任何语言检测失败都会回落到它。
 
-## Repository layout
+## 翻译
 
-```
-installer/     single-file installer (C + Win32)
-tools/         PE tooling, DLL builder, translation pipeline
-translations/  en.json + language packs
-docs/          reverse-engineering notes and review records
-```
+- **1372 条全部人工翻译**，其中 983 条中文化；
+- 用游戏**官方德/法/西/意四个本地化版本逐条对照校核**，修正了一批误译（`sheer`→陡峭、`ex-con`→蹲过大牢、`dopest`→骑得最烂 等）；
+- 保留行首颜色码、`%s/%d/%c` 占位符与换行制表符；
+- 8 位车手短名保留英文（它们参与人物立绘路径 `Chars\<名字>-F.RRI`，翻译会掉图，官方四语版同样保留）。
 
-## License
+## 支持的版本
 
-Code: MIT. The patch contains no original game assets; fan-made and non-commercial.
-"Road Rash" is a trademark of Electronic Arts Inc.
+仅**简体中文**。英语/德语/法语/意大利语/西班牙语为游戏官方自带，无需补丁；
+其他语言的机翻版本经实测渲染不可靠，已从本项目移除。
 
----
+## 许可
 
-# 暴力摩托：30 周年纪念版 · 汉化补丁
-
-**已验证语言**：简体中文、繁體中文、日本語、한국어。
-英语 / 德法西意五种是**游戏官方自带**，不需要补丁。
-其余语言为机翻且渲染未经完整验证，**默认不随安装包发布**，源码保留在 `translations/lang/` 供后续完善。
-
-**安装**：把对应语言的安装器**放进游戏目录**（与 `RoadRash95.exe` 同级）后双击，按提示操作。
-卸载：再运行一次选择卸载，即可完整还原。
-
-**改动**：`TEXT\ENU.DLL` 换成对应语言文本（原文件备份为 `.rrzhbak`）；
-`RoadRash95.exe` 仅改字体字符集与字体名（等长字节，原文件备份）。全部可逆。
-
-简体中文为人工翻译，并用游戏官方德/法/西/意四语版本逐条对照校校；
-其余已验证语言为机器翻译。详见 `docs/`。
+代码 MIT。本补丁不含任何游戏原始资源，非官方、非商业。
+“Road Rash” 为 Electronic Arts Inc. 商标。

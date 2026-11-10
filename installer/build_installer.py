@@ -11,7 +11,7 @@ from languages import LANGS
 HDR = 48
 META = {c: (cp, cs, face) for c, native, cp, cs, face in LANGS}
 
-SHIP = ['zh-CN', 'zh-TW', 'ja', 'ko']
+SHIP = ['zh-CN']  # 只发布简体中文
 
 MSG = {
 'zh-CN': ["暴力摩托：30 周年纪念版 — 简体中文安装程序",
